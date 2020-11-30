@@ -2,7 +2,7 @@
 
 ## Terraform
 
-O terraform desenolvido tem a lógica de criação dos recursos que serão utilizados pela aplicação,
+O terraform desenvolvido tem a lógica de criação dos recursos que serão utilizados pela aplicação,
 assim como a subida da aplicação propriamente dito no ECS/EC2 com autoscalling.
 
 Você deve usar a versão do client do terraform 0.13, para garantir que todos 
