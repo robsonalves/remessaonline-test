@@ -18,7 +18,7 @@ Comandos:
 > terraform plan
 
 
-## Walkthrough
+## Walkthrough Terraform
 
 O primeiro passo de criação será a VPC, para ter uma rede básica, com NAT (permitindo a conexão da subnet a internet)
 assim como subnets privadas, sem acesso de IP público, ideal para aplicações backend ou API, não ficarem expostas e
@@ -58,12 +58,16 @@ ex:
 
 
 # Nginx
-Na pasta Nginx, tem um Dockerfile simples para a subida do Nginx e está dockerfile servirá como base para gerar uma imagem
+Na pasta Nginx, tem um Dockerfile simples para a subida do Nginx e este dockerfile servirá como base para gerar uma imagem
 imutável de uma aplicação e ela será referenciada no script application.tf durante o deploy.
+
+As portas e outras definições vem das configurações do services do ECS (e do ALB)
 
 
 # Gitlab
 Na pasta Gitlab, tem um script inicial do gitlab, já iniciando uma separação lógica de build e deploy da aplicação, com a
 execução do terraform, seguindo os comandos, terraform init, terraform validate e no release o terraform apply --auto-approve.
+
+Note que em alguns passos existe um SED no arquivo *gitlab-ci* para replace das variáveis, simulando um deploy.
 
 
