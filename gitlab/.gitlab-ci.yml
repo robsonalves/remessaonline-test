@@ -1,0 +1,87 @@
+variables:
+  REPOSITORY_URL: xxxx.dkr.ecr.us-east-2.amazonaws.com/remessaonline
+  GIT_STRATEGY: fetch
+  GIT_DEPTH: 1
+
+stages:
+  - build
+  - infrastructure
+  - codequality
+  - test
+  - release
+  - clear
+
+build_develop:
+  stage: build
+  script:
+    - cd ../nginx
+    - docker build -t remessaonline:${CI_PIPELINE_ID} -t remessaonline:latest .
+    - docker tag remessaonline_application ${REPOSITORY_URL}_nginx:${CI_PIPELINE_ID}
+    - docker push ${REPOSITORY_URL}_nginx:${CI_PIPELINE_ID}
+  tags:
+    - build-app
+  only:
+    - develop
+
+build_terraform:
+  stage: infrastructure
+  script:
+    - cd ../build_terraform
+    - terraform init
+    - terraform validate
+  tags:
+    - build-terraform
+  only:
+    - develop
+
+codequality_sonar:
+  stage: codequality
+  script:
+    - sonarthings other tools
+  tags:
+    test-codequality
+  only:
+    - merge_request
+  
+deploy_develop:
+  stage: release
+  environment:
+    name: hml-virtual
+
+  script:
+    - cd ../terraform
+    - sed -i 's/$ENVIRONMENT/'"$ENVIRONMENT"'/' vars.tf 
+    - sed -i 's/$APPLICATION/'"$APPLICATION"'/' vars.tf
+    - terraform apply --auto-approve
+  tags:
+    - release-app
+  only: develop
+
+build_master:
+  stage: build
+  script:
+    - cd ../nginx
+    - docker build -t remessaonline:${CI_PIPELINE_ID} .
+    - docker tag remessaonline_application ${REPOSITORY_URL}_nginx:${CI_PIPELINE_ID}
+    - docker push ${REPOSITORY_URL}_nginx:${CI_PIPELINE_ID}
+  tags:
+    - build-app
+  only:
+    - master
+
+deploy_production:
+  stage: release
+  environment:
+    name: prd-virtual
+
+  script:
+    - cd ../terraform
+    - sed -i 's/$ENVIRONMENT/'"$ENVIRONMENT"'/' vars.tf 
+    - sed -i 's/$APPLICATION/'"$APPLICATION"'/' vars.tf
+    - sed -i 's/$DOCKER_IMAGE/'"$DOCKER_IMAGE"'/' application.tf
+    - terraform apply --auto-approve
+  tags:
+    - release-app
+  only: master
+
+
